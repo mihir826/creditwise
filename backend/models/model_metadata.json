@@ -1,0 +1,348 @@
+{
+  "trained_at": "2026-10-23T11:10:31+00:00",
+  "sklearn_version": "1.9.1",
+  "dataset": {
+    "rows_total": 1000,
+    "rows_missing_target_dropped": 50,
+    "rows_used": 950,
+    "approved": 298,
+    "not_approved": 652
+  },
+  "split": {
+    "test_size": 0.2,
+    "stratified": true,
+    "random_state": 42,
+    "train_rows": 760,
+    "test_rows": 190
+  },
+  "selection_rule": "Highest mean 5-fold CV F1 on the training set (ties: ROC-AUC, then simpler variant).",
+  "selected": {
+    "key": "logistic_regression",
+    "label": "Logistic Regression",
+    "engineered_features": true
+  },
+  "cv_results": [
+    {
+      "key": "logistic_regression",
+      "label": "Logistic Regression",
+      "engineered_features": false,
+      "accuracy": 0.8552631578947368,
+      "precision": 0.8003021230888772,
+      "recall": 0.722872340425532,
+      "f1": 0.7576543011149272,
+      "roc_auc": 0.9204800629335204,
+      "accuracy_std": 0.013800116423291459,
+      "precision_std": 0.049705968775551806,
+      "recall_std": 0.041663271326878075,
+      "f1_std": 0.022123545870340735,
+      "roc_auc_std": 0.011353720019723318
+    },
+    {
+      "key": "logistic_regression",
+      "label": "Logistic Regression",
+      "engineered_features": true,
+      "accuracy": 0.8631578947368421,
+      "precision": 0.7961750116021244,
+      "recall": 0.7606382978723404,
+      "f1": 0.7767107196447018,
+      "roc_auc": 0.9299092042709063,
+      "accuracy_std": 0.015231364345776613,
+      "precision_std": 0.036176144779632345,
+      "recall_std": 0.0426887247639318,
+      "f1_std": 0.02394099727954255,
+      "roc_auc_std": 0.0076865111191058095
+    },
+    {
+      "key": "knn",
+      "label": "K-Nearest Neighbours (k=5)",
+      "engineered_features": false,
+      "accuracy": 0.8105263157894737,
+      "precision": 0.7176530612244898,
+      "recall": 0.6513297872340426,
+      "f1": 0.6817995246661285,
+      "roc_auc": 0.8591511037721145,
+      "accuracy_std": 0.029244882593280074,
+      "precision_std": 0.050425832554641364,
+      "recall_std": 0.06757715365857561,
+      "f1_std": 0.05422909904768352,
+      "roc_auc_std": 0.0244378480359298
+    },
+    {
+      "key": "knn",
+      "label": "K-Nearest Neighbours (k=5)",
+      "engineered_features": true,
+      "accuracy": 0.8105263157894737,
+      "precision": 0.7071081263648027,
+      "recall": 0.6806737588652482,
+      "f1": 0.6928288703161846,
+      "roc_auc": 0.86606952887538,
+      "accuracy_std": 0.03956130625887605,
+      "precision_std": 0.07185590681956895,
+      "recall_std": 0.05966555747291647,
+      "f1_std": 0.06049902657316869,
+      "roc_auc_std": 0.02927555370535773
+    },
+    {
+      "key": "naive_bayes",
+      "label": "Gaussian Naive Bayes",
+      "engineered_features": false,
+      "accuracy": 0.8552631578947368,
+      "precision": 0.8161159861159861,
+      "recall": 0.6975177304964539,
+      "f1": 0.7506534325889165,
+      "roc_auc": 0.9375257433169667,
+      "accuracy_std": 0.02162062726994078,
+      "precision_std": 0.046028568451470554,
+      "recall_std": 0.052377489087493546,
+      "f1_std": 0.0380504235774707,
+      "roc_auc_std": 0.010723141143509406
+    },
+    {
+      "key": "naive_bayes",
+      "label": "Gaussian Naive Bayes",
+      "engineered_features": true,
+      "accuracy": 0.8644736842105262,
+      "precision": 0.8221943515421778,
+      "recall": 0.7268617021276595,
+      "f1": 0.7695527009781803,
+      "roc_auc": 0.9420061764476658,
+      "accuracy_std": 0.008924118398849037,
+      "precision_std": 0.024049351974533232,
+      "recall_std": 0.056570009613101345,
+      "f1_std": 0.02408349545571043,
+      "roc_auc_std": 0.008095006802229457
+    }
+  ],
+  "excluded_features": [
+    "Gender"
+  ],
+  "excluded_feature_sensitivity": {
+    "included_features": [
+      "Gender"
+    ],
+    "accuracy": 0.868421052631579,
+    "precision": 0.8047260048921178,
+    "recall": 0.7692375886524824,
+    "f1": 0.7848901253835807,
+    "roc_auc": 0.9306819908814591
+  },
+  "test_metrics": {
+    "accuracy": 0.8842105263157894,
+    "precision": 0.8392857142857143,
+    "recall": 0.7833333333333333,
+    "f1": 0.8103448275862069,
+    "roc_auc": 0.934102564102564,
+    "brier": 0.09072129687944601,
+    "confusion_matrix": {
+      "tn": 121,
+      "fp": 9,
+      "fn": 13,
+      "tp": 47
+    }
+  },
+  "threshold": 0.5,
+  "explain": {
+    "feature_names": [
+      "num__Applicant_Income",
+      "num__Coapplicant_Income",
+      "num__Age",
+      "num__Dependents",
+      "num__Credit_Score",
+      "num__Existing_Loans",
+      "num__DTI_Ratio",
+      "num__Savings",
+      "num__Collateral_Value",
+      "num__Loan_Amount",
+      "num__Loan_Term",
+      "cat__Employment_Status_Contract",
+      "cat__Employment_Status_Salaried",
+      "cat__Employment_Status_Self-employed",
+      "cat__Employment_Status_Unemployed",
+      "cat__Marital_Status_Married",
+      "cat__Marital_Status_Single",
+      "cat__Loan_Purpose_Business",
+      "cat__Loan_Purpose_Car",
+      "cat__Loan_Purpose_Education",
+      "cat__Loan_Purpose_Home",
+      "cat__Loan_Purpose_Personal",
+      "cat__Property_Area_Rural",
+      "cat__Property_Area_Semiurban",
+      "cat__Property_Area_Urban",
+      "cat__Education_Level_Graduate",
+      "cat__Education_Level_Not Graduate",
+      "cat__Employer_Category_Business",
+      "cat__Employer_Category_Government",
+      "cat__Employer_Category_MNC",
+      "cat__Employer_Category_Private",
+      "cat__Employer_Category_Unemployed"
+    ],
+    "transformed_means": [
+      1.719384868399749e-16,
+      -3.8565641908031756e-17,
+      -1.95749849078646e-17,
+      -3.1502578323738816e-16,
+      1.793886676631174e-16,
+      -9.597585883930629e-17,
+      7.074019732562264e-17,
+      -1.9728370983635184e-16,
+      1.98963652570982e-16,
+      2.977150689718512e-16,
+      7.596262800066861e-17,
+      0.2118421052631579,
+      0.5184210526315789,
+      0.18026315789473685,
+      0.08947368421052632,
+      0.6539473684210526,
+      0.3460526315789474,
+      0.19473684210526315,
+      0.24868421052631579,
+      0.16973684210526316,
+      0.19473684210526315,
+      0.19210526315789472,
+      0.29342105263157897,
+      0.19342105263157894,
+      0.5131578947368421,
+      0.718421052631579,
+      0.28157894736842104,
+      0.13026315789473683,
+      0.21052631578947367,
+      0.13815789473684212,
+      0.41973684210526313,
+      0.1013157894736842
+    ]
+  },
+  "schema": {
+    "numeric": [
+      {
+        "name": "Applicant_Income",
+        "min": 2009.0,
+        "max": 19988.0,
+        "median": 10336.5,
+        "integer": false
+      },
+      {
+        "name": "Coapplicant_Income",
+        "min": 1.0,
+        "max": 9996.0,
+        "median": 5150.0,
+        "integer": false
+      },
+      {
+        "name": "Age",
+        "min": 21.0,
+        "max": 59.0,
+        "median": 40.0,
+        "integer": true
+      },
+      {
+        "name": "Dependents",
+        "min": 0.0,
+        "max": 3.0,
+        "median": 1.0,
+        "integer": true
+      },
+      {
+        "name": "Credit_Score",
+        "min": 550.0,
+        "max": 799.0,
+        "median": 677.0,
+        "integer": true
+      },
+      {
+        "name": "Existing_Loans",
+        "min": 0.0,
+        "max": 4.0,
+        "median": 2.0,
+        "integer": true
+      },
+      {
+        "name": "DTI_Ratio",
+        "min": 0.1,
+        "max": 0.6,
+        "median": 0.34,
+        "integer": false
+      },
+      {
+        "name": "Savings",
+        "min": 73.0,
+        "max": 19996.0,
+        "median": 9737.0,
+        "integer": false
+      },
+      {
+        "name": "Collateral_Value",
+        "min": 36.0,
+        "max": 49936.0,
+        "median": 23842.0,
+        "integer": false
+      },
+      {
+        "name": "Loan_Amount",
+        "min": 1015.0,
+        "max": 39973.0,
+        "median": 21269.5,
+        "integer": false
+      },
+      {
+        "name": "Loan_Term",
+        "min": 12.0,
+        "max": 84.0,
+        "median": 48.0,
+        "integer": true
+      }
+    ],
+    "categorical": [
+      {
+        "name": "Employment_Status",
+        "options": [
+          "Contract",
+          "Salaried",
+          "Self-employed",
+          "Unemployed"
+        ]
+      },
+      {
+        "name": "Marital_Status",
+        "options": [
+          "Married",
+          "Single"
+        ]
+      },
+      {
+        "name": "Loan_Purpose",
+        "options": [
+          "Business",
+          "Car",
+          "Education",
+          "Home",
+          "Personal"
+        ]
+      },
+      {
+        "name": "Property_Area",
+        "options": [
+          "Rural",
+          "Semiurban",
+          "Urban"
+        ]
+      },
+      {
+        "name": "Education_Level",
+        "options": [
+          "Graduate",
+          "Not Graduate"
+        ]
+      },
+      {
+        "name": "Employer_Category",
+        "options": [
+          "Business",
+          "Government",
+          "MNC",
+          "Private",
+          "Unemployed"
+        ]
+      }
+    ]
+  }
+}

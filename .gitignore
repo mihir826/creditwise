@@ -1,0 +1,25 @@
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+backend/.venv
+backend/.venv.nosync/
+backend/.env
+
+# Local data (saved calculations live here)
+backend/data/*.db
+backend/data/*.db-journal
+
+# Frontend (see frontend/.gitignore for the rest)
+frontend/node_modules/
+frontend/.next/
+frontend/.env*
+!frontend/.env.example
+
+# Third-party design reference image (not part of this project)
+9391ee1dd72f0ca6f395b68d7bcc2706b1c2cb8cd59c09497c4cac46c42007d5.png

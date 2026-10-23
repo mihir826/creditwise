@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+/* CreditWise design tokens. Dark-only by design (see README). */
+:root {
+  color-scheme: dark;
+  --bg: #111214;
+  --surface: #191a1d;
+  --surface-2: #222327;
+  --surface-3: #2a2b30;
+  --border: #303136;
+  --border-strong: #3d3e45;
+  --fg: #f5f4f7;
+  --muted: #a5a4ae;
+  --subtle: #8a8994;
+  --lavender: #c5acff;
+  --lavender-ink: #1d1530;
+  --mint: #c7e8b0;
+  --mint-ink: #15230d;
+  --danger: #ff9b9b;
+  /* Chart series: validated for dark surface (lightness band, chroma, CVD). */
+  --chart-1: #9272e6;
+  --chart-2: #68a04c;
+  --chart-3: #cc7096;
+  --chart-line: #c5acff;
+  --grid: #2a2b30;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-lavender: var(--lavender);
+  --color-lavender-ink: var(--lavender-ink);
+  --color-mint: var(--mint);
+  --color-mint-ink: var(--mint-ink);
+  --color-danger: var(--danger);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  /* Instrument Serif has no ₹ glyph, so amounts fall back to Inter. */
+  --font-serif: var(--font-instrument), var(--font-inter), ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 20px;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+}
+
+::selection {
+  background: color-mix(in oklab, var(--lavender) 40%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--lavender);
+  outline-offset: 2px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Range slider */
+input[type="range"].cw-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"].cw-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--lavender) var(--fill, 0%), var(--surface-3) var(--fill, 0%));
+}
+input[type="range"].cw-range::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--surface-3);
+}
+input[type="range"].cw-range::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--lavender);
+}
+input[type="range"].cw-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 18px;
+  width: 18px;
+  margin-top: -7px;
+  border-radius: 999px;
+  background: var(--fg);
+  border: 4px solid var(--lavender);
+  transition: transform 120ms ease;
+}
+input[type="range"].cw-range::-moz-range-thumb {
+  height: 12px;
+  width: 12px;
+  border-radius: 999px;
+  background: var(--fg);
+  border: 4px solid var(--lavender);
+}
+input[type="range"].cw-range:hover::-webkit-slider-thumb {
+  transform: scale(1.1);
+}
+input[type="range"].cw-range:focus-visible {
+  outline: none;
+}
+input[type="range"].cw-range:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--lavender) 35%, transparent);
+}
+
+/* Hide number spinners */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
