@@ -95,5 +95,24 @@ await page.getByRole("button", { name: "Run prediction" }).click();
 await page.getByText("Why the model said this").waitFor({ timeout: 8000 });
 ok(await page.getByText(/Likely (not )?approved/).isVisible(), "prediction rendered with explanation");
 
+// Age is capped at 85
+const age = page.getByLabel("Age", { exact: true });
+await age.fill("86");
+ok(await page.getByText("Age must be between 18 and 85.").isVisible(), "age 86 rejected with message");
+ok(await page.getByRole("button", { name: "Run prediction" }).isDisabled(), "prediction blocked while age invalid");
+await age.fill("85");
+
+// PhD is selectable and explained
+await page.getByLabel("Education", { exact: true }).selectOption("PhD");
+ok(await page.getByText("Treated as Graduate").isVisible(), "PhD option available with honest mapping note");
+
+// Amounts have no upper limit
+for (const [label, v] of [["Applicant income", "5000000000"], ["Savings", "900000000"], ["Collateral value", "7500000000"], ["Loan amount", "250000000"]]) {
+  await page.getByLabel(label, { exact: true }).fill(v);
+}
+await page.getByRole("button", { name: "Run prediction" }).click();
+await page.getByText("These values are accepted").waitFor({ timeout: 8000 });
+ok(await page.getByText(/Education Level 'PhD' is treated as 'Graduate'/).isVisible(), "very large amounts + PhD + age 85 predicted, with notes");
+
 console.log("console/page errors:", errors.length ? errors : "none");
 await browser.close();

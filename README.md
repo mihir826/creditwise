@@ -76,7 +76,7 @@ Production: `npm run build && npm start`.
 | **Compare** | 2 or 3 scenarios, editable independently, loadable from saved calculations or via `/compare?ids=1,2`. Shows a metrics table, differences against the cheapest scenario, a cost chart and balance curves. "Lowest cost" means the lowest interest plus fees, and a warning appears when loan amounts differ. |
 | **PDF report** | Generated server-side. Includes branding, date, loan details, principal-vs-interest donut, yearly bar chart, methodology, a disclaimer, and the full schedule across as many pages as needed with repeated headers. |
 | **Saved** | Save, view, rename, delete (with confirmation), reopen in the calculator, download a PDF, and select 2 or 3 to compare. |
-| **Predict** | Approval probability from the retrained model, an exact per-feature explanation, out-of-training-range warnings, and a full model card. |
+| **Predict** | Approval probability from the retrained model, an exact per-feature explanation and a full model card. Income, co-applicant income, savings, collateral and loan amount accept any non-negative amount (values beyond the training range are accepted, with an extrapolation warning). Age is limited to 18–85. Education offers Not Graduate / Graduate / PhD; the dataset has no PhD level, so PhD is treated as Graduate and the result says so. |
 | **Methodology** | Formulas, rounding, cost definitions, model notes and the storage model. |
 
 ### Formulas and rounding
@@ -108,7 +108,7 @@ The candidates are the notebook's three algorithms (Logistic Regression, KNN k=5
 
 Confusion matrix: TN 121, FP 9, FN 13, TP 47.
 
-The explanations are exact for this linear model. Each feature's contribution is `coef · (x − training mean)` in the transformed space, and the contributions sum to the model's log-odds. The service checks this sum on every request. The units of the monetary features are not stated in the dataset, so the UI labels them "dataset units" rather than INR.
+The explanations are exact for this linear model. Each feature's contribution is `coef · (x − training mean)` in the transformed space, and the contributions sum to the model's log-odds. The service checks this sum on every request. The units of the monetary features are not stated in the dataset, so the UI labels them "dataset units" rather than INR. Very large amounts are accepted, but a linear model extrapolates far outside its training data, so such predictions approach 0% or 100%; the UI flags these cases.
 
 ## Storage and privacy (single-user)
 
@@ -120,10 +120,10 @@ Run on 23 Oct 2026 with both servers up:
 
 | Suite | Command | Result |
 |---|---|---|
-| Backend: finance engine, API, PDF/CSV, persistence, ML | `cd backend && .venv/bin/python -m pytest` | **44 passed** |
+| Backend: finance engine, API, PDF/CSV, persistence, ML | `cd backend && .venv/bin/python -m pytest` | **49 passed** |
 | Frontend: formatting and form validation | `cd frontend && npm test` | **10 passed** |
 | Frontend: lint and types | `npm run lint && npm run typecheck` | **clean** |
-| End-to-end browser smoke test | `cd frontend && npm run e2e` | **16/16 checks passed**, no console errors |
+| End-to-end browser smoke test | `cd frontend && npm run e2e` | **20/20 checks passed**, no console errors |
 
 The backend suite covers:
 
@@ -133,6 +133,7 @@ The backend suite covers:
 - schedule invariants (opening = previous closing, Σ principal = P, final balance 0) and fee/IRR checks
 - comparison ranking and aggregation
 - multi-page PDFs and CSV content
+- the prediction inputs: the age cap (85 accepted, 86 rejected), PhD mapped to Graduate, very large amounts accepted, and Infinity/NaN rejected with a 422 instead of a 500
 - CRUD persistence across clients
 - that the served model reproduces its reported test metrics, that preprocessing was fitted only on training rows, and that explanations sum to the prediction
 

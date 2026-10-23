@@ -7,6 +7,7 @@ import re
 from decimal import Decimal
 
 from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -35,6 +36,14 @@ app = FastAPI(title="CreditWise API", version="1.0.0")
 
 _origins = [o.strip() for o in os.environ.get("CREDITWISE_CORS_ORIGINS", "http://localhost:3000").split(",") if o.strip()]
 app.add_middleware(CORSMiddleware, allow_origins=_origins, allow_methods=["*"], allow_headers=["*"])
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
+    # The default handler echoes each invalid input back, which itself fails
+    # for values JSON cannot represent (Infinity, NaN) and turns a 422 into a 500.
+    errors = [{"loc": list(e.get("loc", ())), "msg": e.get("msg", "Invalid input"), "type": e.get("type", "")} for e in exc.errors()]
+    return JSONResponse(status_code=422, content={"detail": errors})
 
 
 @app.exception_handler(fin.LoanInputError)

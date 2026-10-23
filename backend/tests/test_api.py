@@ -113,3 +113,10 @@ def test_saved_crud_and_persistence(client, tmp_path):
 def test_saved_validation(client):
     assert client.post("/api/calculations", json={"name": "", "loan": LOAN}).status_code == 422
     assert client.post("/api/calculations", json={"name": "x", "loan": {**LOAN, "principal": 10}}).status_code == 422
+
+
+def test_non_finite_loan_inputs_return_422_not_500(client):
+    for raw in ('{"principal": Infinity, "annual_rate": 9, "tenure_months": 12}', '{"principal": 100000, "annual_rate": NaN, "tenure_months": 12}'):
+        res = client.post("/api/loans/calculate", content=raw, headers={"content-type": "application/json"})
+        assert res.status_code == 422
+        assert res.json()["detail"][0]["loc"]

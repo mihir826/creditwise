@@ -139,6 +139,8 @@ export interface ModelInfo {
   excluded_feature_sensitivity: Metrics & { included_features: string[] };
   test_metrics: Metrics & { brier: number; confusion_matrix: { tn: number; fp: number; fn: number; tp: number } };
   threshold: number;
+  /** UI-only options mapped to a category the model knows, e.g. PhD -> Graduate. */
+  input_aliases: Record<string, Record<string, string>>;
   schema: {
     numeric: NumericFeature[];
     categorical: { name: string; options: string[] }[];
@@ -153,4 +155,5 @@ export interface Prediction {
   contributions: { feature: string; value: number | string; log_odds: number }[];
   out_of_range: string[];
   model_label: string;
+  notes: string[];
 }

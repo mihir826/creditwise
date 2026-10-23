@@ -38,6 +38,8 @@ const GROUPS: { title: string; fields: string[] }[] = [
 ];
 
 const MONEY_FIELDS = new Set(["Applicant_Income", "Coapplicant_Income", "Savings", "Collateral_Value", "Loan_Amount"]);
+/** Mirrors the backend's PredictionRequest bounds (backend/app/schemas.py). */
+const AGE_LIMITS = { min: 18, max: 85 };
 
 const pct = (v: number) => `${(v * 100).toFixed(1)}%`;
 
@@ -63,7 +65,11 @@ export function PredictView() {
   }, []);
 
   const numeric = useMemo(() => new Map(info?.schema.numeric.map((n) => [n.name, n])), [info]);
-  const categorical = useMemo(() => new Map(info?.schema.categorical.map((c) => [c.name, c.options])), [info]);
+  // Category options the model was trained on, plus UI aliases (e.g. PhD).
+  const categorical = useMemo(
+    () => new Map(info?.schema.categorical.map((c) => [c.name, [...c.options, ...Object.keys(info.input_aliases?.[c.name] ?? {})]])),
+    [info],
+  );
 
   const fieldErrors = useMemo(() => {
     const errs: Record<string, string> = {};
@@ -73,6 +79,8 @@ export function PredictView() {
       if (raw === "" || !Number.isFinite(n)) errs[name] = "Enter a number.";
       else if (n < 0) errs[name] = "Cannot be negative.";
       else if (spec.integer && !Number.isInteger(n)) errs[name] = "Use a whole number.";
+      else if (name === "Age" && (n < AGE_LIMITS.min || n > AGE_LIMITS.max))
+        errs[name] = `Age must be between ${AGE_LIMITS.min} and ${AGE_LIMITS.max}.`;
     });
     return errs;
   }, [numeric, values]);
@@ -129,7 +137,10 @@ export function PredictView() {
           <div className="mt-8 grid gap-5 lg:grid-cols-12">
             <Card className="p-5 sm:p-7 lg:col-span-7">
               <form onSubmit={submit} noValidate>
-                <CardHeader title="Applicant profile" description="Prefilled with training-set medians and the first option of each category. Hints show the range seen in training." />
+                <CardHeader
+                  title="Applicant profile"
+                  description="Prefilled with training-set medians and the first option of each category. Income, savings, collateral and loan amount accept any amount; age is capped at 85."
+                />
                 <div className="mt-6 space-y-8">
                   {GROUPS.map((g) => (
                     <fieldset key={g.title}>
@@ -146,6 +157,7 @@ export function PredictView() {
                                 {LABELS[name] ?? name}
                               </label>
                               {opts ? (
+                                <>
                                 <select
                                   id={id}
                                   value={values[name] ?? ""}
@@ -156,6 +168,13 @@ export function PredictView() {
                                     <option key={o}>{o}</option>
                                   ))}
                                 </select>
+                                {info.input_aliases?.[name]?.[values[name]] && (
+                                  <p className="mt-1 text-[11px] text-subtle">
+                                    Treated as {info.input_aliases[name][values[name]]} — the training data has no separate{" "}
+                                    {values[name]} level.
+                                  </p>
+                                )}
+                                </>
                               ) : spec ? (
                                 <>
                                   <input
@@ -163,6 +182,8 @@ export function PredictView() {
                                     type="number"
                                     inputMode="decimal"
                                     step={spec.integer ? 1 : "any"}
+                                    min={name === "Age" ? AGE_LIMITS.min : 0}
+                                    max={name === "Age" ? AGE_LIMITS.max : undefined}
                                     value={values[name] ?? ""}
                                     onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.value }))}
                                     aria-invalid={!!fieldErrors[name]}
@@ -174,7 +195,11 @@ export function PredictView() {
                                   />
                                   <p id={`${id}-hint`} className={cn("mt-1 text-[11px]", fieldErrors[name] ? "text-danger" : out ? "text-[#ecd3a0]" : "text-subtle")}>
                                     {fieldErrors[name] ??
-                                      `${out ? "Outside training range: " : "Training range "}${formatNumber(spec.min)} – ${formatNumber(spec.max)}${MONEY_FIELDS.has(name) ? " (dataset units)" : ""}`}
+                                      (MONEY_FIELDS.has(name)
+                                        ? `Any amount${out ? " — beyond" : " ·"} training data ${formatNumber(spec.min)} – ${formatNumber(spec.max)} (dataset units)`
+                                        : name === "Age"
+                                          ? `18 – 85 · training data ${formatNumber(spec.min)} – ${formatNumber(spec.max)}`
+                                          : `${out ? "Outside training range: " : "Training range "}${formatNumber(spec.min)} – ${formatNumber(spec.max)}`)}
                                   </p>
                                 </>
                               ) : null}
@@ -235,11 +260,16 @@ function ResultCard({ result, error, busy }: { result: Prediction | null; error:
       <div className={cn("mt-4 h-2 overflow-hidden rounded-full", approved ? "bg-mint-ink/15" : "bg-surface-3")} role="img" aria-label={`Probability ${pct(result.probability)}`}>
         <div className={cn("h-full rounded-full", approved ? "bg-mint-ink" : "bg-chart-3")} style={{ width: `${result.probability * 100}%` }} />
       </div>
+      {result.notes.map((n) => (
+        <p key={n} className={cn("mt-4 text-[13px]", approved ? "opacity-80" : "text-muted")}>
+          {n}
+        </p>
+      ))}
       {result.out_of_range.length > 0 && (
         <p className={cn("mt-4 flex items-start gap-2 text-[13px]", approved ? "opacity-80" : "text-[#ecd3a0]")}>
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
-          Outside the training data range: {result.out_of_range.map((f) => LABELS[f] ?? f).join(", ")}. The model is
-          extrapolating, so treat this result with extra caution.
+          Beyond the range seen in training: {result.out_of_range.map((f) => LABELS[f] ?? f).join(", ")}. These values are
+          accepted, but the model is extrapolating, so treat this result with extra caution.
         </p>
       )}
     </section>

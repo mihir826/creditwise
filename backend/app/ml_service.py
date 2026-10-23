@@ -23,6 +23,15 @@ PIPELINE_PATH = MODEL_DIR / "loan_approval_pipeline.joblib"
 METADATA_PATH = MODEL_DIR / "model_metadata.json"
 
 
+# Inputs the UI offers that the training data never contained, mapped to the
+# closest category the model knows. The dataset only distinguishes
+# Graduate / Not Graduate, so a PhD is (correctly) a Graduate to the model and
+# cannot change the prediction on its own.
+INPUT_ALIASES: dict[str, dict[str, str]] = {
+    "Education_Level": {"PhD": "Graduate"},
+}
+
+
 class ModelUnavailable(RuntimeError):
     pass
 
@@ -42,7 +51,9 @@ def load() -> tuple[Any, dict]:
 
 def public_metadata() -> dict:
     _, meta = load()
-    return {k: v for k, v in meta.items() if k != "explain"}
+    public = {k: v for k, v in meta.items() if k != "explain"}
+    public["input_aliases"] = INPUT_ALIASES
+    return public
 
 
 def _sigmoid(z: float) -> float:
@@ -64,10 +75,23 @@ def predict(features: dict[str, Any]) -> dict:
     categorical = [c["name"] for c in schema["categorical"]]
     numeric = [n["name"] for n in schema["numeric"]]
 
+    notes: list[str] = []
+    original = dict(features)
+    features = dict(features)
+    for name, aliases in INPUT_ALIASES.items():
+        if features.get(name) in aliases:
+            mapped = aliases[features[name]]
+            notes.append(
+                f"{name.replace('_', ' ')} '{features[name]}' is treated as '{mapped}': "
+                "the training data has no separate level for it, so it does not change the prediction."
+            )
+            features[name] = mapped
+
     for c in schema["categorical"]:
         if features[c["name"]] not in c["options"]:
             raise PredictionInputError(
-                f"{c['name']} must be one of: {', '.join(c['options'])}."
+                f"{c['name']} must be one of: "
+                f"{', '.join(c['options'] + list(INPUT_ALIASES.get(c['name'], {})))}."
             )
 
     row = pd.DataFrame([{k: features[k] for k in numeric + categorical}])
@@ -98,7 +122,7 @@ def predict(features: dict[str, Any]) -> dict:
             raise RuntimeError("Explanation does not reproduce the model output.")
         contributions = sorted(
             (
-                {"feature": k, "value": features[k], "log_odds": v}
+                {"feature": k, "value": original[k], "log_odds": v}
                 for k, v in grouped.items()
             ),
             key=lambda c: abs(c["log_odds"]),
@@ -113,4 +137,5 @@ def predict(features: dict[str, Any]) -> dict:
         "contributions": contributions,
         "out_of_range": out_of_range,
         "model_label": meta["selected"]["label"],
+        "notes": notes,
     }

@@ -87,3 +87,44 @@ def test_predict_api(client):
     assert client.post("/api/model/predict", json={**APPLICANT, "Credit_Score": 50}).status_code == 422
     assert client.post("/api/model/predict", json={**APPLICANT, "Gender": "Male"}).status_code == 422
     assert client.get("/api/model").json()["selected"]["label"]
+
+
+def test_phd_is_accepted_and_treated_as_graduate():
+    phd = ml_service.predict({**APPLICANT, "Education_Level": "PhD"})
+    grad = ml_service.predict({**APPLICANT, "Education_Level": "Graduate"})
+    assert phd["probability"] == pytest.approx(grad["probability"])
+    assert any("PhD" in n for n in phd["notes"])
+    assert grad["notes"] == []
+    edu = next(c for c in phd["contributions"] if c["feature"] == "Education_Level")
+    assert edu["value"] == "PhD"
+    assert ml_service.public_metadata()["input_aliases"]["Education_Level"]["PhD"] == "Graduate"
+
+
+def test_age_capped_at_85(client):
+    assert client.post("/api/model/predict", json={**APPLICANT, "Age": 85}).status_code == 200
+    assert client.post("/api/model/predict", json={**APPLICANT, "Age": 86}).status_code == 422
+    assert client.post("/api/model/predict", json={**APPLICANT, "Age": 17}).status_code == 422
+
+
+def test_amounts_have_no_upper_limit(client):
+    huge = {
+        **APPLICANT,
+        "Applicant_Income": 5_000_000_000,
+        "Coapplicant_Income": 2_000_000_000,
+        "Savings": 9_000_000_000,
+        "Collateral_Value": 50_000_000_000,
+        "Loan_Amount": 25_000_000_000,
+    }
+    res = client.post("/api/model/predict", json=huge)
+    assert res.status_code == 200
+    body = res.json()
+    assert 0 <= body["probability"] <= 1
+    assert {"Applicant_Income", "Savings", "Collateral_Value", "Loan_Amount"} <= set(body["out_of_range"])
+
+
+def test_non_finite_amounts_rejected(client):
+    import json as _json
+
+    payload = _json.dumps({**APPLICANT, "Applicant_Income": float("inf")})  # serialises as Infinity
+    res = client.post("/api/model/predict", content=payload, headers={"content-type": "application/json"})
+    assert res.status_code == 422

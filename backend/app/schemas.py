@@ -162,11 +162,12 @@ class DashboardOut(BaseModel):
 
 
 class PredictionRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    # Monetary fields have no upper limit, but must be finite numbers.
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     Applicant_Income: float = Field(ge=0)
     Coapplicant_Income: float = Field(ge=0)
-    Age: int = Field(ge=18, le=100)
+    Age: int = Field(ge=18, le=85)
     Dependents: int = Field(ge=0, le=20)
     Credit_Score: int = Field(ge=300, le=900)
     Existing_Loans: int = Field(ge=0, le=50)
@@ -197,3 +198,4 @@ class PredictionOut(BaseModel):
     contributions: list[Contribution]
     out_of_range: list[str]
     model_label: str
+    notes: list[str]
